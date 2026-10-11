@@ -2,27 +2,57 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>E-commerce - Login</title>
+    <title>FlashStore - Entrar</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <main style="max-width: 400px; margin: 50px auto;">
-        <div class="form-container">
-            <h3 style="text-align: center;">Entrar no Sistema</h3>
-            <p style="text-align: center; font-size: 0.8em; color: #888;">
-                Conectado a: <span id="display-server">...</span> 
-                (<a href="index.html" style="color: #0066cc;">Alterar</a>)
+    <div class="top-bar">
+        <span>OFERTA RELÂMPAGO</span> Ingressos Prime Day com até 50% OFF
+    </div>
+
+    <header class="store-header">
+        <a href="index.html" class="brand">
+            <span class="brand-badge">⚡ FlashStore</span>
+        </a>
+        <div class="header-search">
+            <input type="text" placeholder="Buscar eventos, ingressos ou produtos..." disabled>
+        </div>
+        <div class="header-actions">
+            <span style="font-size: 0.85rem; color: var(--text-muted);">
+                Servidor: <strong id="display-server">...</strong> (<a href="index.html">Alterar</a>)
+            </span>
+        </div>
+    </header>
+
+    <main>
+        <div class="form-container" style="max-width: 440px; margin: 30px auto;">
+            <h2 class="form-title">Acessar Minha Conta</h2>
+            <p class="form-subtitle">Entre para gerenciar reservas e acompanhar suas compras.</p>
+
+            <div class="input-group">
+                <label for="login-email">Endereço de E-mail</label>
+                <input type="email" id="login-email" placeholder="seuemail@dominio.com">
+            </div>
+
+            <div class="input-group">
+                <label for="login-password">Senha de Acesso</label>
+                <input type="password" id="login-password" placeholder="Sua senha de 6 a 20 caracteres">
+            </div>
+
+            <button onclick="fazerLogin()" style="width: 100%; margin-top: 8px;">Entrar na Conta</button>
+
+            <p style="text-align: center; margin-top: 20px; font-size: 0.9rem; color: var(--text-muted);">
+                Ainda não tem cadastro? <a href="cadastro.html">Criar nova conta</a>
             </p>
-            <br>
-            <input type="email" id="login-email" placeholder="E-mail (@ e domínio obrigatórios)">
-            <input type="password" id="login-password" placeholder="Senha (6-20 chars alfanuméricos)">
-            <button onclick="fazerLogin()" style="width: 100%;">Fazer Login</button>
-            <p style="text-align: center; margin-top: 15px;">Não tem conta? <a href="cadastro.html">Cadastre-se aqui</a></p>
         </div>
     </main>
+
+    <footer>
+        <p>Tecnologias Cliente-Servidor • UTFPR / E-Commerce Flash Sale System</p>
+    </footer>
+
     <script src="app.js"></script>
     <script>
-        // Exibe o servidor conectado
         document.getElementById('display-server').innerText = `${localStorage.getItem('serverIp')}:${localStorage.getItem('serverPort')}`;
     </script>
 </body>

@@ -2,28 +2,59 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>E-commerce - Cadastro</title>
+    <title>FlashStore - Cadastro</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <main style="max-width: 400px; margin: 50px auto;">
-        <div class="form-container">
-            <h3 style="text-align: center;">Criar Nova Conta</h3>
-            <p style="text-align: center; font-size: 0.8em; color: #888;">
-                Conectado a: <span id="display-server">...</span>
-                (<a href="index.html" style="color: #0066cc;">Alterar</a>)
+    <div class="top-bar">
+        <span>NOVO CADASTRO</span> Garanta prioridade na fila de reservas
+    </div>
+
+    <header class="store-header">
+        <a href="index.html" class="brand">
+            <span class="brand-badge">⚡ FlashStore</span>
+        </a>
+        <div class="header-actions">
+            <span style="font-size: 0.85rem; color: var(--text-muted);">
+                Servidor: <strong id="display-server">...</strong> (<a href="index.html">Alterar</a>)
+            </span>
+        </div>
+    </header>
+
+    <main>
+        <div class="form-container" style="max-width: 460px; margin: 20px auto;">
+            <h2 class="form-title">Criar Conta de Cliente</h2>
+            <p class="form-subtitle">Cadastre-se para participar das vendas relâmpago de alta demanda.</p>
+
+            <div class="input-group">
+                <label for="cad-nome">Nome Completo</label>
+                <input type="text" id="cad-nome" placeholder="Ex: João da Silva">
+            </div>
+
+            <div class="input-group">
+                <label for="cad-email">E-mail</label>
+                <input type="email" id="cad-email" placeholder="seuemail@dominio.com">
+            </div>
+
+            <div class="input-group">
+                <label for="cad-password">Senha Alfanumérica (6-20 caracteres)</label>
+                <input type="password" id="cad-password" placeholder="Ex: senha123 (sem caracteres especiais)">
+            </div>
+
+            <button onclick="cadastrarUsuario()" style="width: 100%; margin-top: 8px;">Concluir Cadastro</button>
+
+            <p style="text-align: center; margin-top: 20px; font-size: 0.9rem; color: var(--text-muted);">
+                Já possui uma conta? <a href="login.html">Faça login</a>
             </p>
-            <br>
-            <input type="text" id="cad-nome" placeholder="Nome completo">
-            <input type="email" id="cad-email" placeholder="E-mail (@ e domínio obrigatórios)">
-            <input type="password" id="cad-password" placeholder="Senha (6-20 chars alfanuméricos)">
-            <button onclick="cadastrarUsuario()" style="width: 100%;">Cadastrar</button>
-            <p style="text-align: center; margin-top: 15px;">Já possui conta? <a href="login.html">Faça Login</a></p>
         </div>
     </main>
+
+    <footer>
+        <p>Tecnologias Cliente-Servidor • UTFPR / E-Commerce Flash Sale System</p>
+    </footer>
+
     <script src="app.js"></script>
     <script>
-        // Exibe o servidor conectado
         document.getElementById('display-server').innerText = `${localStorage.getItem('serverIp')}:${localStorage.getItem('serverPort')}`;
     </script>
 </body>

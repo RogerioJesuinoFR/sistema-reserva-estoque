@@ -2,30 +2,76 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>E-commerce - Minha Conta</title>
+    <title>FlashStore - Minha Conta</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <main>
-        <section id="dashboard-section">
-            <h2>Bem-vindo(a), <span id="user-name">Carregando...</span></h2>
-            
-            <div class="form-container">
-                <h3>Meus Dados</h3>
-                <p><strong>E-mail:</strong> <span id="user-email">...</span></p>
-                <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
-                <h4>Atualizar Perfil</h4>
-                <input type="text" id="upd-nome" placeholder="Alterar Nome">
-                <input type="password" id="upd-password" placeholder="Alterar Senha">
-                <button onclick="atualizarUsuario()">Salvar Alterações</button>
-            </div>
+    <div class="top-bar">
+        <span>SESSÃO ATIVA</span> Suas reservas estão temporariamente garantidas
+    </div>
 
-            <div class="actions">
-                <button class="danger" onclick="deletarUsuario()">Apagar Minha Conta</button>
-                <button onclick="fazerLogout()">Sair (Logout)</button>
+    <header class="store-header">
+        <a href="#" class="brand">
+            <span class="brand-badge">⚡ FlashStore</span>
+        </a>
+        <div class="header-search">
+            <input type="text" placeholder="Buscar ingressos, Shows, Prime Day Deals...">
+        </div>
+        <div class="header-actions">
+            <div class="cart-icon" title="Carrinho de Compras">
+                🛒 <span class="cart-count">0</span>
             </div>
-        </section>
+            <button class="danger" onclick="fazerLogout()" style="padding: 8px 16px; font-size: 0.85rem;">Sair</button>
+        </div>
+    </header>
+
+    <main>
+        <!-- Banner Promocional de E-commerce -->
+        <div class="promo-banner">
+            <div>
+                <span class="promo-tag">Venda Relâmpago</span>
+                <h3 style="margin-top: 8px;">Prime Day & Eventos Especiais</h3>
+                <p style="font-size: 0.9rem; opacity: 0.9;">Aproveite ingressos com fila de espera gerenciada em tempo real.</p>
+            </div>
+            <div style="font-size: 2.5rem;">🎟️</div>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Sidebar do Perfil -->
+            <aside class="user-sidebar">
+                <div class="avatar" id="user-avatar">👤</div>
+                <h3 id="user-name" style="font-size: 1.2rem; margin-bottom: 4px;">Carregando...</h3>
+                <p id="user-email" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">...</p>
+                <hr style="border: 0; border-top: 1px solid var(--border); margin-bottom: 20px;">
+                <button class="danger" onclick="deletarUsuario()" style="width: 100%; font-size: 0.85rem;">
+                    🗑️ Apagar Minha Conta
+                </button>
+            </aside>
+
+            <!-- Formulário de Atualização -->
+            <section class="form-container">
+                <h3 class="form-title">Configurações do Perfil</h3>
+                <p class="form-subtitle">Atualize seus dados pessoais de cadastro no sistema de reservas.</p>
+
+                <div class="input-group">
+                    <label for="upd-nome">Alterar Nome Completo</label>
+                    <input type="text" id="upd-nome" placeholder="Digite o novo nome">
+                </div>
+
+                <div class="input-group">
+                    <label for="upd-password">Alterar Senha</label>
+                    <input type="password" id="upd-password" placeholder="Nova senha alfanumérica">
+                </div>
+
+                <button onclick="atualizarUsuario()" style="margin-top: 12px;">💾 Salvar Alterações</button>
+            </section>
+        </div>
     </main>
+
+    <footer>
+        <p>Tecnologias Cliente-Servidor • UTFPR / E-Commerce Flash Sale System</p>
+    </footer>
+
     <script src="app.js"></script>
 </body>
 </html>
