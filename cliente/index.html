@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-commerce - Cliente</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h2>Configuração do Servidor</h2>
+        <div class="server-config">
+            <label>IP: <input type="text" id="server-ip" value="127.0.0.1"></label>
+            <label>Porta: <input type="text" id="server-port" value="3000"></label>
+        </div>
+    </header>
+
+    <main id="app-content">
+        <!-- Area Deslogada (Login e Cadastro) -->
+        <section id="auth-section">
+            <div class="form-container">
+                <h3>Login</h3>
+                <input type="email" id="login-email" placeholder="E-mail (@ e domínio obrigatórios)">
+                <input type="password" id="login-password" placeholder="Senha (6-20 chars alfanuméricos)">
+                <button onclick="fazerLogin()">Entrar</button>
+            </div>
+
+            <div class="form-container">
+                <h3>Cadastro</h3>
+                <input type="text" id="cad-nome" placeholder="Nome">
+                <input type="email" id="cad-email" placeholder="E-mail (@ e domínio obrigatórios)">
+                <input type="password" id="cad-password" placeholder="Senha (6-20 chars alfanuméricos)">
+                <button onclick="cadastrarUsuario()">Cadastrar</button>
+            </div>
+        </section>
+
+        <!-- Area Logada (Dashboard do Usuário) -->
+        <section id="dashboard-section" style="display: none;">
+            <h2>Bem-vindo, <span id="user-name"></span></h2>
+            
+            <div class="form-container">
+                <h3>Meus Dados</h3>
+                <p>E-mail: <span id="user-email"></span></p>
+                <input type="text" id="upd-nome" placeholder="Novo Nome">
+                <input type="password" id="upd-password" placeholder="Nova Senha">
+                <button onclick="atualizarUsuario()">Atualizar Dados</button>
+            </div>
+
+            <div class="actions">
+                <button class="danger" onclick="deletarUsuario()">Apagar Minha Conta</button>
+                <button onclick="fazerLogout()">Sair (Logout)</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
