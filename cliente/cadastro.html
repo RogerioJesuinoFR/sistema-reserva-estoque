@@ -6,23 +6,25 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <h2>Configuração do Servidor</h2>
-        <div class="server-config">
-            <label>IP: <input type="text" id="server-ip"></label>
-            <label>Porta: <input type="text" id="server-port"></label>
-        </div>
-    </header>
-    <main>
+    <main style="max-width: 400px; margin: 50px auto;">
         <div class="form-container">
-            <h3>Criar Nova Conta</h3>
+            <h3 style="text-align: center;">Criar Nova Conta</h3>
+            <p style="text-align: center; font-size: 0.8em; color: #888;">
+                Conectado a: <span id="display-server">...</span>
+                (<a href="index.html" style="color: #0066cc;">Alterar</a>)
+            </p>
+            <br>
             <input type="text" id="cad-nome" placeholder="Nome completo">
             <input type="email" id="cad-email" placeholder="E-mail (@ e domínio obrigatórios)">
             <input type="password" id="cad-password" placeholder="Senha (6-20 chars alfanuméricos)">
-            <button onclick="cadastrarUsuario()">Cadastrar</button>
-            <p>Já possui conta? <a href="login.html">Faça Login</a></p>
+            <button onclick="cadastrarUsuario()" style="width: 100%;">Cadastrar</button>
+            <p style="text-align: center; margin-top: 15px;">Já possui conta? <a href="login.html">Faça Login</a></p>
         </div>
     </main>
     <script src="app.js"></script>
+    <script>
+        // Exibe o servidor conectado
+        document.getElementById('display-server').innerText = `${localStorage.getItem('serverIp')}:${localStorage.getItem('serverPort')}`;
+    </script>
 </body>
 </html>

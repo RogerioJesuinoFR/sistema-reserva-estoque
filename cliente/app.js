@@ -1,24 +1,50 @@
-// Configuração persistente de IP e Porta (localStorage)
+let isInternalNavigation = false;
+
+document.addEventListener('click', (e) => {
+    const anchor = e.target.closest('a');
+    if (anchor) isInternalNavigation = true;
+});
+
+// Encerra a sessão ao fechar a aba
+window.addEventListener('pagehide', () => {
+    if (!isInternalNavigation) {
+        const token = sessionStorage.getItem('token');
+        const sessionId = sessionStorage.getItem('sessionId');
+        const ip = localStorage.getItem('serverIp');
+        const port = localStorage.getItem('serverPort');
+
+        if (token && sessionId && ip && port) {
+            fetch(`http://${ip}:${port}/api/v1/sessions/${sessionId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` },
+                keepalive: true
+            });
+            sessionStorage.clear();
+        }
+    }
+});
+
+function navegarPara(pagina) {
+    isInternalNavigation = true;
+    window.location.href = pagina;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-    const ipInput = document.getElementById('server-ip');
-    const portInput = document.getElementById('server-port');
-    
-    if (ipInput && portInput) {
-        // Carrega os valores salvos ou coloca o padrão
-        ipInput.value = localStorage.getItem('serverIp') || '127.0.0.1';
-        portInput.value = localStorage.getItem('serverPort') || '3000';
-        
-        // Salva sempre que o usuário digitar algo novo
-        ipInput.addEventListener('input', (e) => localStorage.setItem('serverIp', e.target.value));
-        portInput.addEventListener('input', (e) => localStorage.setItem('serverPort', e.target.value));
+    if (!window.location.pathname.endsWith('index.html') && !window.location.pathname.endsWith('/')) {
+        const ip = localStorage.getItem('serverIp');
+        const port = localStorage.getItem('serverPort');
+        if (!ip || !port) {
+            alert("Você precisa configurar o servidor primeiro.");
+            navegarPara('index.html');
+            return;
+        }
     }
 
-    // Identifica se está no dashboard e carrega os dados
     if (window.location.pathname.includes('dashboard.html')) {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         if (!token) {
             alert('Acesso negado. Faça login!');
-            window.location.href = 'login.html';
+            navegarPara('login.html');
         } else {
             carregarDadosUsuario();
         }
@@ -26,129 +52,152 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 const getBaseUrl = () => {
-    const ip = localStorage.getItem('serverIp') || '127.0.0.1';
-    const port = localStorage.getItem('serverPort') || '3000';
-    return `http://${ip}:${port}`;
+    const ip = localStorage.getItem('serverIp');
+    const port = localStorage.getItem('serverPort');
+    return `http://${ip}:${port}/api/v1`;
 };
 
-// ================= FUNCIONALIDADES =================
-
-// CADASTRO (cadastro.html)
+// CADASTRO: POST /api/v1/users
 async function cadastrarUsuario() {
     const nome = document.getElementById('cad-nome').value;
     const email = document.getElementById('cad-email').value;
-    const password = document.getElementById('cad-password').value;
+    const senha = document.getElementById('cad-password').value;
 
     try {
-        const res = await fetch(`${getBaseUrl()}/usuarios`, {
+        const res = await fetch(`${getBaseUrl()}/users`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nome, email, password })
+            body: JSON.stringify({ nome, email, senha })
         });
         const data = await res.json();
         
-        alert(data.message || data.error);
-        if (res.ok) window.location.href = 'login.html'; // Redireciona para o login
-    } catch (err) { alert("Erro ao conectar com o servidor."); }
+        if (res.status === 201) {
+            alert("Cadastro realizado com sucesso! Faça login para continuar.");
+            navegarPara('login.html');
+        } else {
+            alert(data.mensagem || "Erro ao realizar cadastro.");
+        }
+    } catch (err) { alert(`Erro de conexão com o servidor.`); }
 }
 
-// LOGIN (login.html)
+// LOGIN: POST /api/v1/sessions
 async function fazerLogin() {
     const email = document.getElementById('login-email').value;
-    const password = document.getElementById('login-password').value;
+    const senha = document.getElementById('login-password').value;
 
     try {
-        const res = await fetch(`${getBaseUrl()}/login`, {
+        const res = await fetch(`${getBaseUrl()}/sessions`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
+            body: JSON.stringify({ email, senha })
         });
         const data = await res.json();
         
-        if (res.ok) {
-            localStorage.setItem('token', data.token); // Salva o token
-            window.location.href = 'dashboard.html'; // Vai para o sistema
+        if (res.status === 201) {
+            sessionStorage.setItem('token', data.token);
+            sessionStorage.setItem('sessionId', data.id);
+            sessionStorage.setItem('userId', data.usuario.id);
+            navegarPara('dashboard.html');
         } else {
-            alert(data.error);
+            alert(data.mensagem || "Erro ao efetuar login.");
         }
-    } catch (err) { alert("Erro ao conectar com o servidor."); }
+    } catch (err) { alert(`Erro de conexão com o servidor.`); }
 }
 
-// CARREGAR DADOS (dashboard.html)
+// BUSCAR DADOS: GET /api/v1/users/{id}
 async function carregarDadosUsuario() {
+    const userId = sessionStorage.getItem('userId');
+    const token = sessionStorage.getItem('token');
+
     try {
-        const res = await fetch(`${getBaseUrl()}/usuarios/me`, {
+        const res = await fetch(`${getBaseUrl()}/users/${userId}`, {
             method: 'GET',
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            headers: { 'Authorization': `Bearer ${token}` }
         });
-        const data = await res.json();
         
         if (res.ok) {
+            const data = await res.json();
             document.getElementById('user-name').innerText = data.nome;
             document.getElementById('user-email').innerText = data.email;
         } else {
-            alert(data.error);
+            const data = await res.json();
+            alert(data.mensagem || "Erro ao carregar perfil.");
             fazerLogout(true);
         }
-    } catch (err) { alert("Erro ao carregar dados."); }
+    } catch (err) { alert("Erro ao carregar dados do servidor."); }
 }
 
-// ATUALIZAR DADOS (dashboard.html)
+// ATUALIZAR DADOS: PATCH /api/v1/users/{id}
 async function atualizarUsuario() {
+    const userId = sessionStorage.getItem('userId');
+    const token = sessionStorage.getItem('token');
     const nome = document.getElementById('upd-nome').value;
-    const password = document.getElementById('upd-password').value;
+    const senha = document.getElementById('upd-password').value;
+
     const payload = {};
     if (nome) payload.nome = nome;
-    if (password) payload.password = password;
+    if (senha) payload.senha = senha;
 
     try {
-        const res = await fetch(`${getBaseUrl()}/usuarios/me`, {
-            method: 'PUT',
+        const res = await fetch(`${getBaseUrl()}/users/${userId}`, {
+            method: 'PATCH',
             headers: { 
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}` 
+                'Authorization': `Bearer ${token}` 
             },
             body: JSON.stringify(payload)
         });
         const data = await res.json();
-        alert(data.message || data.error);
+        
         if (res.ok) {
+            alert("Dados atualizados com sucesso!");
             document.getElementById('upd-nome').value = '';
             document.getElementById('upd-password').value = '';
             carregarDadosUsuario();
+        } else {
+            alert(data.mensagem || "Erro ao atualizar dados.");
         }
     } catch (err) { alert("Erro ao atualizar dados."); }
 }
 
-// APAGAR CONTA (dashboard.html)
+// APAGAR CONTA: DELETE /api/v1/users/{id}
 async function deletarUsuario() {
     const confirmacao = confirm("Tem certeza absoluta que deseja apagar seu cadastro?");
     if (confirmacao) {
+        const userId = sessionStorage.getItem('userId');
+        const token = sessionStorage.getItem('token');
+
         try {
-            const res = await fetch(`${getBaseUrl()}/usuarios/me`, {
+            const res = await fetch(`${getBaseUrl()}/users/${userId}`, {
                 method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                headers: { 'Authorization': `Bearer ${token}` }
             });
-            const data = await res.json();
-            alert(data.message || data.error);
-            if (res.ok) {
-                localStorage.removeItem('token');
-                window.location.href = 'login.html';
+
+            if (res.status === 204) {
+                alert("Cadastro excluído com sucesso.");
+                sessionStorage.clear();
+                navegarPara('login.html');
+            } else {
+                const data = await res.json();
+                alert(data.mensagem || "Erro ao apagar conta.");
             }
         } catch (err) { alert("Erro ao apagar conta."); }
     }
 }
 
-// LOGOUT (dashboard.html)
+// LOGOUT: DELETE /api/v1/sessions/{id}
 async function fazerLogout(localOnly = false) {
     if (!localOnly) {
+        const sessionId = sessionStorage.getItem('sessionId');
+        const token = sessionStorage.getItem('token');
+
         try {
-            await fetch(`${getBaseUrl()}/logout`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            await fetch(`${getBaseUrl()}/sessions/${sessionId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
             });
-        } catch (err) { console.error("Erro no logout no servidor"); }
+        } catch (err) { console.error("Erro ao realizar logout no servidor"); }
     }
-    localStorage.removeItem('token');
-    window.location.href = 'login.html';
+    sessionStorage.clear();
+    navegarPara('login.html');
 }
