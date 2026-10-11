@@ -15,7 +15,8 @@ app.use((req, res, next) => {
     console.log(`\n[${dataHora}] === NOVA REQUISIÇÃO RECEBIDA ===`);
     console.log(`-> Método: ${req.method} | Rota: ${req.url}`);
     
-    if (Object.keys(req.body).length > 0) {
+    // CORREÇÃO: Garante que req.body existe e não está vazio antes de imprimir
+    if (req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0) {
         console.log(`-> Dados (Body):`, req.body);
     }
     
