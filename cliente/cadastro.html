@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>E-commerce - Cadastro</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h2>Configuração do Servidor</h2>
+        <div class="server-config">
+            <label>IP: <input type="text" id="server-ip"></label>
+            <label>Porta: <input type="text" id="server-port"></label>
+        </div>
+    </header>
+    <main>
+        <div class="form-container">
+            <h3>Criar Nova Conta</h3>
+            <input type="text" id="cad-nome" placeholder="Nome completo">
+            <input type="email" id="cad-email" placeholder="E-mail (@ e domínio obrigatórios)">
+            <input type="password" id="cad-password" placeholder="Senha (6-20 chars alfanuméricos)">
+            <button onclick="cadastrarUsuario()">Cadastrar</button>
+            <p>Já possui conta? <a href="login.html">Faça Login</a></p>
+        </div>
+    </main>
+    <script src="app.js"></script>
+</body>
+</html>

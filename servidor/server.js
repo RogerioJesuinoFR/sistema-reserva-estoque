@@ -7,33 +7,58 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Bancos de dados em memória
-let users = [];
-let whitelist = []; // Mantém os tokens de usuários logados
+// ==============================================================
+// MIDDLEWARE DE LOGS (Exibe Requisições e Respostas no Terminal)
+// ==============================================================
+app.use((req, res, next) => {
+    const dataHora = new Date().toLocaleString('pt-BR');
+    console.log(`\n[${dataHora}] === NOVA REQUISIÇÃO RECEBIDA ===`);
+    console.log(`-> Método: ${req.method} | Rota: ${req.url}`);
+    
+    if (Object.keys(req.body).length > 0) {
+        console.log(`-> Dados (Body):`, req.body);
+    }
+    
+    if (req.headers['authorization']) {
+        console.log(`-> Token (Auth): ${req.headers['authorization'].split(' ')[1]}`);
+    }
 
-// Validações
+    // Intercepta a resposta (res.json) para logar no terminal antes de enviar ao cliente
+    const originalJson = res.json;
+    res.json = function (body) {
+        console.log(`<- Resposta Enviada (Status ${res.statusCode}):`);
+        console.log(body);
+        console.log(`=================================================\n`);
+        return originalJson.call(this, body);
+    };
+
+    next();
+});
+
+// ==============================================================
+// BANCO DE DADOS EM MEMÓRIA E VALIDAÇÕES
+// ==============================================================
+let users = [];
+let whitelist = []; 
+
 const validateEmail = (email) => {
-    // Tamanho entre 5 e 30[cite: 1], obrigatório ter @ e domínio[cite: 1]
     if (!email || email.length < 5 || email.length > 30) return false;
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
 };
 
 const validatePassword = (password) => {
-    // Tamanho entre 6 e 20[cite: 2], alfanumérica[cite: 2], sem caracteres especiais[cite: 2]
     if (!password || password.length < 6 || password.length > 20) return false;
     const regex = /^[a-zA-Z0-9]+$/;
     return regex.test(password);
 };
 
-// Middleware de Autenticação (Whitelist)
+// MIDDLEWARE DE AUTENTICAÇÃO
 const authMiddleware = (req, res, next) => {
     const token = req.headers['authorization'];
     if (!token) return res.status(401).json({ error: 'Token não fornecido.' });
 
-    const bearerToken = token.split(' ')[1]; // formato: "Bearer token"
-    
-    // Verifica se o token está na whitelist[cite: 2]
+    const bearerToken = token.split(' ')[1]; 
     const session = whitelist.find(w => w.token === bearerToken);
     if (!session) return res.status(401).json({ error: 'Sessão inválida ou expirada. Faça login.' });
 
@@ -42,7 +67,11 @@ const authMiddleware = (req, res, next) => {
     next();
 };
 
-// 1. Cadastro de Usuário (C)
+// ==============================================================
+// ROTAS DO SERVIDOR
+// ==============================================================
+
+// 1. Cadastro de Usuário
 app.post('/usuarios', (req, res) => {
     const { nome, email, password } = req.body;
 
@@ -74,12 +103,11 @@ app.post('/login', (req, res) => {
 
 // 3. Logout
 app.post('/logout', authMiddleware, (req, res) => {
-    // Remove o token da whitelist[cite: 2]
     whitelist = whitelist.filter(w => w.token !== req.token);
     res.status(200).json({ message: 'Logout realizado com sucesso.' });
 });
 
-// 4. Leitura do Perfil (R)
+// 4. Leitura do Perfil
 app.get('/usuarios/me', authMiddleware, (req, res) => {
     const user = users.find(u => u.id === req.userId);
     if (!user) return res.status(404).json({ error: 'Usuário não encontrado.' });
@@ -87,7 +115,7 @@ app.get('/usuarios/me', authMiddleware, (req, res) => {
     res.status(200).json({ id: user.id, nome: user.nome, email: user.email });
 });
 
-// 5. Atualização do Perfil (U)
+// 5. Atualização do Perfil
 app.put('/usuarios/me', authMiddleware, (req, res) => {
     const { nome, password } = req.body;
     const userIndex = users.findIndex(u => u.id === req.userId);
@@ -102,26 +130,23 @@ app.put('/usuarios/me', authMiddleware, (req, res) => {
     res.status(200).json({ message: 'Dados atualizados com sucesso!' });
 });
 
-// 6. Deleção do Perfil (D)
+// 6. Deleção do Perfil
 app.delete('/usuarios/me', authMiddleware, (req, res) => {
-    // Remove o usuário
     users = users.filter(u => u.id !== req.userId);
-    // Remove a sessão
     whitelist = whitelist.filter(w => w.token !== req.token);
-
     res.status(200).json({ message: 'Cadastro apagado com sucesso.' });
 });
 
-// Configuração para pedir a porta ao usuário no terminal
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
+// ==============================================================
+// INICIALIZAÇÃO
+// ==============================================================
+const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
 rl.question('Digite a porta para iniciar o servidor (ex: 3000): ', (portInput) => {
     const PORT = portInput || 3000;
     app.listen(PORT, () => {
-        console.log(`✅ Servidor rodando. Escutando na porta ${PORT}...`);
+        console.log(`\n✅ Servidor Escutando na porta ${PORT}...`);
+        console.log(`⏳ Aguardando requisições dos clientes...\n`);
     });
     rl.close();
 });

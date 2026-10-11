@@ -1,20 +1,39 @@
-let currentToken = null;
+// Configuração persistente de IP e Porta (localStorage)
+document.addEventListener('DOMContentLoaded', () => {
+    const ipInput = document.getElementById('server-ip');
+    const portInput = document.getElementById('server-port');
+    
+    if (ipInput && portInput) {
+        // Carrega os valores salvos ou coloca o padrão
+        ipInput.value = localStorage.getItem('serverIp') || '127.0.0.1';
+        portInput.value = localStorage.getItem('serverPort') || '3000';
+        
+        // Salva sempre que o usuário digitar algo novo
+        ipInput.addEventListener('input', (e) => localStorage.setItem('serverIp', e.target.value));
+        portInput.addEventListener('input', (e) => localStorage.setItem('serverPort', e.target.value));
+    }
 
-// Função para montar a URL baseada nas entradas do cliente
+    // Identifica se está no dashboard e carrega os dados
+    if (window.location.pathname.includes('dashboard.html')) {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('Acesso negado. Faça login!');
+            window.location.href = 'login.html';
+        } else {
+            carregarDadosUsuario();
+        }
+    }
+});
+
 const getBaseUrl = () => {
-    const ip = document.getElementById('server-ip').value || '127.0.0.1';
-    const port = document.getElementById('server-port').value || '3000';
+    const ip = localStorage.getItem('serverIp') || '127.0.0.1';
+    const port = localStorage.getItem('serverPort') || '3000';
     return `http://${ip}:${port}`;
 };
 
-// Exibição condicional de telas
-const toggleView = (isLogged) => {
-    document.getElementById('auth-section').style.display = isLogged ? 'none' : 'block';
-    document.getElementById('dashboard-section').style.display = isLogged ? 'block' : 'none';
-    if (isLogged) carregarDadosUsuario();
-};
+// ================= FUNCIONALIDADES =================
 
-// CADASTRO
+// CADASTRO (cadastro.html)
 async function cadastrarUsuario() {
     const nome = document.getElementById('cad-nome').value;
     const email = document.getElementById('cad-email').value;
@@ -27,13 +46,13 @@ async function cadastrarUsuario() {
             body: JSON.stringify({ nome, email, password })
         });
         const data = await res.json();
+        
         alert(data.message || data.error);
-    } catch (err) {
-        alert("Erro ao conectar com o servidor.");
-    }
+        if (res.ok) window.location.href = 'login.html'; // Redireciona para o login
+    } catch (err) { alert("Erro ao conectar com o servidor."); }
 }
 
-// LOGIN
+// LOGIN (login.html)
 async function fazerLogin() {
     const email = document.getElementById('login-email').value;
     const password = document.getElementById('login-password').value;
@@ -47,23 +66,20 @@ async function fazerLogin() {
         const data = await res.json();
         
         if (res.ok) {
-            currentToken = data.token;
-            alert(data.message);
-            toggleView(true);
+            localStorage.setItem('token', data.token); // Salva o token
+            window.location.href = 'dashboard.html'; // Vai para o sistema
         } else {
             alert(data.error);
         }
-    } catch (err) {
-        alert("Erro ao conectar com o servidor.");
-    }
+    } catch (err) { alert("Erro ao conectar com o servidor."); }
 }
 
-// LER DADOS (Requisita dados do servidor)
+// CARREGAR DADOS (dashboard.html)
 async function carregarDadosUsuario() {
     try {
         const res = await fetch(`${getBaseUrl()}/usuarios/me`, {
             method: 'GET',
-            headers: { 'Authorization': `Bearer ${currentToken}` }
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         const data = await res.json();
         
@@ -72,18 +88,15 @@ async function carregarDadosUsuario() {
             document.getElementById('user-email').innerText = data.email;
         } else {
             alert(data.error);
-            fazerLogout(true); // Força logout se token falhou
+            fazerLogout(true);
         }
-    } catch (err) {
-        alert("Erro ao carregar dados.");
-    }
+    } catch (err) { alert("Erro ao carregar dados."); }
 }
 
-// ATUALIZAR DADOS
+// ATUALIZAR DADOS (dashboard.html)
 async function atualizarUsuario() {
     const nome = document.getElementById('upd-nome').value;
     const password = document.getElementById('upd-password').value;
-
     const payload = {};
     if (nome) payload.nome = nome;
     if (password) payload.password = password;
@@ -93,54 +106,49 @@ async function atualizarUsuario() {
             method: 'PUT',
             headers: { 
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${currentToken}` 
+                'Authorization': `Bearer ${localStorage.getItem('token')}` 
             },
             body: JSON.stringify(payload)
         });
         const data = await res.json();
         alert(data.message || data.error);
-        if (res.ok) carregarDadosUsuario();
-    } catch (err) {
-        alert("Erro ao atualizar dados.");
-    }
+        if (res.ok) {
+            document.getElementById('upd-nome').value = '';
+            document.getElementById('upd-password').value = '';
+            carregarDadosUsuario();
+        }
+    } catch (err) { alert("Erro ao atualizar dados."); }
 }
 
-// APAGAR CONTA
+// APAGAR CONTA (dashboard.html)
 async function deletarUsuario() {
-    // Solicitando confirmação antes de apagar, conforme exigido.
-    const confirmacao = confirm("Tem certeza absoluta que deseja apagar seu cadastro? Esta ação não pode ser desfeita.");
-    
+    const confirmacao = confirm("Tem certeza absoluta que deseja apagar seu cadastro?");
     if (confirmacao) {
         try {
             const res = await fetch(`${getBaseUrl()}/usuarios/me`, {
                 method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${currentToken}` }
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
             });
             const data = await res.json();
             alert(data.message || data.error);
             if (res.ok) {
-                currentToken = null;
-                toggleView(false);
+                localStorage.removeItem('token');
+                window.location.href = 'login.html';
             }
-        } catch (err) {
-            alert("Erro ao apagar conta.");
-        }
+        } catch (err) { alert("Erro ao apagar conta."); }
     }
 }
 
-// LOGOUT
+// LOGOUT (dashboard.html)
 async function fazerLogout(localOnly = false) {
     if (!localOnly) {
         try {
             await fetch(`${getBaseUrl()}/logout`, {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${currentToken}` }
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
             });
-        } catch (err) {
-            console.error("Erro na chamada de logout no servidor");
-        }
+        } catch (err) { console.error("Erro no logout no servidor"); }
     }
-    currentToken = null;
-    alert("Logout efetuado com sucesso.");
-    toggleView(false);
+    localStorage.removeItem('token');
+    window.location.href = 'login.html';
 }
