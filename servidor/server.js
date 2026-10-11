@@ -15,7 +15,6 @@ app.use((req, res, next) => {
     console.log(`\n[${dataHora}] === NOVA REQUISIÇÃO RECEBIDA ===`);
     console.log(`-> Método: ${req.method} | Rota: ${req.url}`);
     
-    // CORREÇÃO: Garante que req.body existe e não está vazio antes de imprimir
     if (req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0) {
         console.log(`-> Dados (Body):`, req.body);
     }
@@ -24,7 +23,6 @@ app.use((req, res, next) => {
         console.log(`-> Token (Auth): ${req.headers['authorization'].split(' ')[1]}`);
     }
 
-    // Intercepta a resposta (res.json) para logar no terminal antes de enviar ao cliente
     const originalJson = res.json;
     res.json = function (body) {
         console.log(`<- Resposta Enviada (Status ${res.statusCode}):`);
@@ -34,6 +32,13 @@ app.use((req, res, next) => {
     };
 
     next();
+});
+
+// ==============================================================
+// ROTA DE TESTE DE CONEXÃO (HEALTH CHECK)
+// ==============================================================
+app.get('/ping', (req, res) => {
+    res.status(200).json({ status: 'online', message: 'Servidor ativo e respondendo!' });
 });
 
 // ==============================================================
