@@ -5,7 +5,6 @@ document.addEventListener('click', (e) => {
     if (anchor) isInternalNavigation = true;
 });
 
-// Encerra a sessão ao fechar a aba
 window.addEventListener('pagehide', () => {
     if (!isInternalNavigation) {
         const token = sessionStorage.getItem('token');
@@ -104,7 +103,6 @@ async function fazerLogin() {
     } catch (err) { alert(`Erro de conexão com o servidor.`); }
 }
 
-// BUSCAR DADOS: GET /api/v1/users/{id}
 async function carregarDadosUsuario() {
     const userId = sessionStorage.getItem('userId');
     const token = sessionStorage.getItem('token');
@@ -127,7 +125,6 @@ async function carregarDadosUsuario() {
     } catch (err) { alert("Erro ao carregar dados do servidor."); }
 }
 
-// ATUALIZAR DADOS: PATCH /api/v1/users/{id}
 async function atualizarUsuario() {
     const userId = sessionStorage.getItem('userId');
     const token = sessionStorage.getItem('token');
@@ -160,7 +157,6 @@ async function atualizarUsuario() {
     } catch (err) { alert("Erro ao atualizar dados."); }
 }
 
-// APAGAR CONTA: DELETE /api/v1/users/{id}
 async function deletarUsuario() {
     const confirmacao = confirm("Tem certeza absoluta que deseja apagar seu cadastro?");
     if (confirmacao) {
@@ -185,7 +181,6 @@ async function deletarUsuario() {
     }
 }
 
-// LOGOUT: DELETE /api/v1/sessions/{id}
 async function fazerLogout(localOnly = false) {
     if (!localOnly) {
         const sessionId = sessionStorage.getItem('sessionId');

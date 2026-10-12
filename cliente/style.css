@@ -31,7 +31,6 @@ body {
     flex-direction: column;
 }
 
-/* Top Announcement Banner */
 .top-bar {
     background: linear-gradient(90deg, #1e1b4b, #312e81);
     color: #cbd5e1;
@@ -51,7 +50,6 @@ body {
     margin-right: 8px;
 }
 
-/* Header E-commerce Header */
 .store-header {
     background: var(--card-bg);
     border-bottom: 1px solid var(--border);
@@ -147,7 +145,6 @@ body {
     justify-content: center;
 }
 
-/* Layout Principal */
 main {
     flex: 1;
     padding: 40px 20px;
@@ -156,7 +153,6 @@ main {
     width: 100%;
 }
 
-/* Container do Formulário */
 .form-container {
     background: var(--card-bg);
     border-radius: var(--radius-lg);
@@ -210,7 +206,6 @@ input:focus {
     box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
 }
 
-/* Botões */
 button {
     background: var(--primary);
     color: white;
@@ -245,7 +240,6 @@ button.danger:hover {
     box-shadow: 0 4px 12px rgba(255, 71, 87, 0.25);
 }
 
-/* Dashboard Grid */
 .dashboard-grid {
     display: grid;
     grid-template-columns: 280px 1fr;
@@ -303,7 +297,6 @@ button.danger:hover {
     text-transform: uppercase;
 }
 
-/* Links & Footer */
 a {
     color: var(--primary);
     text-decoration: none;

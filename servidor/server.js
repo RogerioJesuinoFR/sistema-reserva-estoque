@@ -15,9 +15,6 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// ==============================================================
-// BANCO DE DADOS PERSISTENTE (SQLite)
-// ==============================================================
 const dbPath = path.resolve(__dirname, 'database.sqlite');
 const db = new sqlite3.Database(dbPath);
 
@@ -42,7 +39,6 @@ db.serialize(() => {
     `);
 });
 
-// Métodos auxiliares com Promises para operações no SQLite
 const dbRun = (sql, params = []) => new Promise((resolve, reject) => {
     db.run(sql, params, function (err) {
         if (err) reject(err);
@@ -57,9 +53,6 @@ const dbGet = (sql, params = []) => new Promise((resolve, reject) => {
     });
 });
 
-// ==============================================================
-// MIDDLEWARE DE LOGS
-// ==============================================================
 app.use((req, res, next) => {
     const dataHora = new Date().toLocaleString('pt-BR');
     console.log(`\n[${dataHora}] === NOVA REQUISIÇÃO RECEBIDA ===`);
@@ -84,9 +77,6 @@ app.use((req, res, next) => {
     next();
 });
 
-// ==============================================================
-// VALIDAÇÕES CONFORME O SWAGGER
-// ==============================================================
 const validateNome = (nome) => {
     if (!nome || typeof nome !== 'string') return false;
     const trimmed = nome.trim();
@@ -105,7 +95,6 @@ const validateSenha = (senha) => {
     return regex.test(senha);
 };
 
-// Middleware de Autenticação por Token
 const authMiddleware = async (req, res, next) => {
     try {
         const authHeader = req.headers['authorization'];
@@ -128,16 +117,10 @@ const authMiddleware = async (req, res, next) => {
     }
 };
 
-// ==============================================================
-// ROTAS DA API REST (/api/v1)
-// ==============================================================
-
-// Ping / Conectividade
 app.get('/api/v1/ping', (req, res) => {
     res.status(200).json({ mensagem: 'Servidor ativo e respondendo!' });
 });
 
-// 1. Cadastrar Usuário: POST /api/v1/users
 app.post('/api/v1/users', async (req, res) => {
     const { nome, email, senha } = req.body || {};
 
@@ -166,7 +149,6 @@ app.post('/api/v1/users', async (req, res) => {
     }
 });
 
-// 2. Criar Sessão (Login): POST /api/v1/sessions
 app.post('/api/v1/sessions', async (req, res) => {
     const { email, senha } = req.body || {};
 
@@ -202,7 +184,6 @@ app.post('/api/v1/sessions', async (req, res) => {
     }
 });
 
-// 3. Encerrar Sessão (Logout): DELETE /api/v1/sessions/{id}
 app.delete('/api/v1/sessions/:id', authMiddleware, async (req, res) => {
     const sessionId = req.params.id;
 
@@ -224,7 +205,6 @@ app.delete('/api/v1/sessions/:id', authMiddleware, async (req, res) => {
     }
 });
 
-// 4. Buscar Usuário por ID: GET /api/v1/users/{id}
 app.get('/api/v1/users/:id', authMiddleware, async (req, res) => {
     const paramId = parseInt(req.params.id, 10);
     if (isNaN(paramId)) {
@@ -251,7 +231,6 @@ app.get('/api/v1/users/:id', authMiddleware, async (req, res) => {
     }
 });
 
-// 5. Atualizar Usuário Parcialmente: PATCH /api/v1/users/{id}
 app.patch('/api/v1/users/:id', authMiddleware, async (req, res) => {
     const paramId = parseInt(req.params.id, 10);
     if (isNaN(paramId)) {
@@ -304,7 +283,6 @@ app.patch('/api/v1/users/:id', authMiddleware, async (req, res) => {
     }
 });
 
-// 6. Remover Usuário: DELETE /api/v1/users/{id}
 app.delete('/api/v1/users/:id', authMiddleware, async (req, res) => {
     const paramId = parseInt(req.params.id, 10);
     if (isNaN(paramId)) {
@@ -331,9 +309,6 @@ app.delete('/api/v1/users/:id', authMiddleware, async (req, res) => {
     }
 });
 
-// ==============================================================
-// INICIALIZAÇÃO
-// ==============================================================
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
 rl.question('Digite a porta para iniciar o servidor (ex: 3000): ', (portInput) => {
